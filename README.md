@@ -433,3 +433,318 @@ Outlook
 Tree Keys:
 dict_keys(['Overcast', 'Rain', 'Sunny'])
 Accuracy is : 0.75
+
+
+
+5)import numpy as np
+X = np.array(([2, 9], [1, 5], [3, 6]), dtype=float)
+y = np.array(([92], [86], [89]), dtype=float)
+X = X/np.amax(X) # max of array
+y = y/100
+def sigmoid (x):
+return 1/(1 + np.exp(-x))
+def derivatives_sigmoid(x):
+return x * (1 - x)
+epoch=5000
+lr=0.1
+wh = np.random.uniform(size=(2,3))
+bh = np.random.uniform(size=(1,3))
+wout = np.random.uniform(size=(3,1))
+bout = np.random.uniform(size=(1,1))
+for i in range(epoch):
+# forward prop
+hinp=np.dot(X,wh) + bh
+hlayer_act = sigmoid(hinp)
+outinp=np.dot(hlayer_act,wout) + bout
+output = sigmoid(outinp)
+hiddengrad = derivatives_sigmoid(hlayer_act)
+outgrad = derivatives_sigmoid(output)
+EO = y-output
+d_output = EO* outgrad
+EH = d_output.dot(wout.T)
+d_hiddenlayer = EH * hiddengrad
+wout += hlayer_act.T.dot(d_output) *lr
+wh += X.T.dot(d_hiddenlayer) *lr
+
+VII Semester 18CSL76 – Artificial Intelligence & Machine Learning Laboratory
+
+Department of ISE, RNSIT 17
+print("Input: \n" + str(X))
+print("Actual Output: \n" + str(y))
+print("Predicted Output: \n" ,output)
+OUTPUT:
+Input:
+[[0.66666667 1. ]
+[0.33333333 0.55555556]
+[1. 0.66666667]]
+Actual Output:
+[[0.92]
+[0.86]
+[0.89]]
+Predicted Output:
+[[0.69734296]
+[0.68194708]
+[0.69700956]]
+
+
+
+6)import csv
+import random
+import math
+def loadcsv(filename):
+lines = csv.reader(open(filename, "r"))
+dataset = list(lines)
+for i in range(len(dataset)):
+dataset[i] = [float(x) for x in dataset[i]]
+return dataset
+def splitDataset(dataset, splitRatio):
+trainSize = int(len(dataset) * splitRatio)
+trainSet = []
+trainSet,testSet = dataset[:trainSize],dataset[trainSize:]
+return [trainSet, testSet]
+def mean(numbers):
+return sum(numbers)/(len(numbers))
+def stdev(numbers):
+avg = mean(numbers)
+v = 0
+for x in numbers:
+v += (x-avg)**2
+return math.sqrt(v/(len(numbers)-1))
+def summarizeByClass(dataset):
+separated = {}
+for i in range(len(dataset)):
+vector = dataset[i]
+if (vector[-1] not in separated):
+separated[vector[-1]] = []
+separated[vector[-1]].append(vector)
+summaries = {}
+for classValue, instances in separated.items():
+summaries[classValue] = [(mean(attribute), stdev(attribute)) for attribute in
+zip(*instances)][:-1]
+return summaries
+
+VII Semester 18CSL76 – Artificial Intelligence & Machine Learning Laboratory
+
+Department of ISE, RNSIT 19
+def calculateProbability(x, mean, stdev):
+exponent = math.exp((-(x-mean)**2)/(2*(stdev**2)))
+return (1 / ((2*math.pi)**(1/2)*stdev)) * exponent
+def predict(summaries, inputVector):
+probabilities = {}
+for classValue, classSummaries in summaries.items():
+probabilities[classValue] = 1
+for i in range(len(classSummaries)):
+mean, stdev = classSummaries[i]
+x = inputVector[i]
+probabilities[classValue] *= calculateProbability(x, mean, stdev)
+bestLabel, bestProb = None, -1
+for classValue, probability in probabilities.items():
+if bestLabel is None or probability > bestProb:
+bestProb = probability
+bestLabel = classValue
+return bestLabel
+def getPredictions(summaries, testSet):
+predictions = []
+for i in range(len(testSet)):
+result = predict(summaries, testSet[i])
+predictions.append(result)
+return predictions
+def getAccuracy(testSet, predictions):
+correct = 0
+for i in range(len(testSet)):
+if testSet[i][-1] == predictions[i]:
+correct += 1
+return (correct/(len(testSet))) * 100.0
+filename = 'pima-indians-diabetes.csv'
+splitRatio = 0.67
+dataset = loadcsv(filename)
+trainingSet, testSet = splitDataset(dataset, splitRatio)
+summaries = summarizeByClass(trainingSet)
+predictions = getPredictions(summaries, testSet)
+print("\nPredictions:\n",predictions)
+accuracy = getAccuracy(testSet, predictions)
+print('Accuracy ',accuracy)
+
+VII Semester 18CSL76 – Artificial Intelligence & Machine Learning Laboratory
+
+Department of ISE, RNSIT 20
+OUTPUT:
+Naive Bayes Classifier for concept learning problem
+Split 14 rows into
+Number of Training data: 12
+Number of Test Data: 2
+The values assumed for the concept learning attributes are
+OUTLOOK=> Sunny=1 Overcast=2 Rain=3
+TEMPERATURE=> Hot=1 Mild=2 Cool=3
+HUMIDITY=> High=1 Normal=2
+WIND=> Weak=1 Strong=2
+TARGET CONCEPT:PLAY TENNIS=> Yes=10 No=5
+The Training set are:
+[1.0, 1.0, 1.0, 1.0, 5.0]
+The Test data set are:
+[1.0, 1.0, 1.0, 2.0, 5.0]
+The Test data set are:
+[2.0, 1.0, 1.0, 1.0, 10.0]
+The Test data set are:
+[3.0, 2.0, 1.0, 1.0, 10.0]
+The Test data set are:
+[3.0, 3.0, 2.0, 1.0, 10.0]
+The Test data set are:
+[3.0, 3.0, 2.0, 2.0, 5.0]
+The Test data set are:
+[2.0, 3.0, 2.0, 2.0, 10.0]
+The Test data set are:
+[1.0, 2.0, 1.0, 1.0, 5.0]
+The Test data set are:
+[1.0, 3.0, 2.0, 1.0, 10.0]
+The Test data set are:
+[3.0, 2.0, 2.0, 1.0, 10.0]
+The Test data set are:
+[1.0, 2.0, 2.0, 2.0, 10.0]
+The Test data set are:
+[2.0, 2.0, 1.0, 2.0, 10.0]
+The Test data set are:
+
+VII Semester 18CSL76 – Artificial Intelligence & Machine Learning Laboratory
+
+Department of ISE, RNSIT 21
+[2.0, 1.0, 2.0, 1.0, 10.0]
+[3.0, 2.0, 1.0, 2.0, 5.0]
+
+Summarize Attributes By Class
+{5.0: [(1.5, 1.0), (1.75, 0.9574271077563381), (1.25, 0.5), (1.5, 0.5773502691896257)], 10.0:
+[(2.125, 0.8345229603962802), (2.25, 0.7071067811865476), (1.625, 0.5175491695067657),
+(1.375, 0.5175491695067657)]}
+Actual values: [5.0]%
+Predictions: [5.0, 5.0]%
+Accuracy: 50.0%
+
+
+
+7)import matplotlib.pyplot as plt
+from sklearn import datasets
+from sklearn.cluster import KMeans
+import sklearn.metrics as sm
+import pandas as pd
+import numpy as np
+from sklearn import preprocessing
+from sklearn.mixture import GaussianMixture
+l1 = [0,1,2]
+def rename(s):
+l2 = []
+for i in s:
+if i not in l2:
+l2.append(i)
+for i in range(len(s)):
+pos = l2.index(s[i])
+s[i] = l1[pos]
+return s
+iris = datasets.load_iris()
+X = pd.DataFrame(iris.data,columns
+=['Sepal_Length','Sepal_Width','Petal_Length','Petal_Width'] )
+y = pd.DataFrame(iris.target,columns = ['Targets'])
+def graph_plot(l,title,s,target):
+plt.subplot(l[0],l[1],l[2])
+if s==1:
+plt.scatter(X.Sepal_Length,X.Sepal_Width, c=colormap[target], s=40)
+else:
+plt.scatter(X.Petal_Length,X.Petal_Width, c=colormap[target], s=40)
+plt.title(title)
+plt.figure()
+colormap = np.array(['red', 'lime', 'black'])
+graph_plot([1, 2, 1],'sepal',1,y.Targets)
+
+VII Semester 18CSL76 – Artificial Intelligence & Machine Learning Laboratory
+
+Department of ISE, RNSIT 23
+graph_plot([1, 2, 2],'petal',0,y.Targets)
+plt.show()
+def fit_model(modelName):
+model = modelName(3)
+model.fit(X)
+plt.figure()
+colormap = np.array(['red', 'lime', 'black'])
+graph_plot([1, 2, 1],'Real Classification',0,y.Targets)
+if modelName == KMeans:
+m = 'Kmeans’
+else:
+m = 'Em'
+y1 = model.predict(X)
+graph_plot([1, 2, 2],m,0,y1)
+plt.show()
+km = rename(y1)
+print("\nPredicted: \n", km)
+print("Accuracy ",sm.accuracy_score(y, km))
+print("Confusion Matrix ",sm.confusion_matrix(y, km))
+
+fit_model(KMeans)
+fit_model(GaussianMixture)
+
+
+
+8)#import the dataset and library files
+from sklearn.datasets import load_iris
+from sklearn.neighbors import KNeighborsClassifier
+import numpy as np
+from sklearn.model_selection import train_test_split
+iris_dataset=load_iris()
+#display the iris dataset
+print("\n IRIS FEATURES \ TARGET NAMES: \n ", iris_dataset.target_names)
+for i in range(len(iris_dataset.target_names)):
+print("\n[{0}]:[{1}]".format(i,iris_dataset.target_names[i]))
+print("\n IRIS DATA :\n",iris_dataset["data"])
+#split the data into training and testing data
+X_train, X_test, y_train, y_test = train_test_split(iris_dataset["data"], iris_dataset["target"]
+, random_state=0)
+print("\n Target :\n",iris_dataset["target"])
+print("\n X TRAIN \n", X_train)
+print("\n X TEST \n", X_test)
+print("\n Y TRAIN \n", y_train)
+print("\n Y TEST \n", y_test)
+#train and fit the model
+kn = KNeighborsClassifier(n_neighbors=5)
+kn.fit(X_train, y_train)
+#predicting from model
+x_new = np.array([[5, 2.9, 1, 0.2]])
+print("\n XNEW \n",x_new)
+prediction = kn.predict(x_new)
+print("\n Predicted target value: {}\n".format(prediction))
+print("\n Predicted feature name: {}\n".format(iris_dataset["target_names"][prediction]))
+i=1
+x= X_test[i]
+x_new = np.array([x])
+print("\n XNEW \n",x_new)
+
+VII Semester 18CSL76 – Artificial Intelligence & Machine Learning Laboratory
+
+Department of ISE, RNSIT 30
+for i in range(len(X_test)):
+x = X_test[i]
+x_new = np.array([x])
+prediction = kn.predict(x_new)
+print("\n Actual : {0} {1}, Predicted :{2}{3}".format(y_test[i],iris_dataset["target_names
+"][y_test[i]],prediction,iris_dataset["target_names"][ prediction]))
+print("\n TEST SCORE[ACCURACY]: {:.2f}\n".format(kn.score(X_test, y_test)))
+
+
+
+
+8)import numpy as np
+import matplotlib.pyplot as plt
+def local_regression(x0, X, Y, tau):
+x0 = [1, x0]
+X = [[1, i] for i in X]
+X = np.asarray(X)
+xw = (X.T) * np.exp(np.sum((X - x0) ** 2, axis=1) / (-2 * tau))
+beta = np.linalg.pinv(xw @ X) @ xw @ Y @ x0
+return beta
+def draw(tau):
+prediction = [local_regression(x0, X, Y, tau) for x0 in domain]
+plt.plot(X, Y, 'o', color='black')
+plt.plot(domain, prediction, color='red')
+plt.show()
+X = np.linspace(-3, 3, num=1000)
+domain = X
+Y = np.log(np.abs(X ** 2 - 1) + .5)
+draw(10)
+draw(0.1)

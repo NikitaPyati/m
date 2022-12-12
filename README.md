@@ -729,7 +729,7 @@ print("\n TEST SCORE[ACCURACY]: {:.2f}\n".format(kn.score(X_test, y_test)))
 
 
 
-8)import numpy as np
+9)import numpy as np
 import matplotlib.pyplot as plt
 def local_regression(x0, X, Y, tau):
 x0 = [1, x0]
